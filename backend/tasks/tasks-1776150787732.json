@@ -1,0 +1,37 @@
+{
+  "prompt": "make me a video about animals",
+  "createdAt": "2026-04-14T07:13:07.732Z",
+  "aiResponse": "Of course! Here are 5 specific, actionable tasks to help you create a video about animals:\n\n1. Research Animals - \"Research different types of animals from around the world, including their habitats, behaviors, and unique features. Collect images and videos to use in your video.\"\n2. Script Writing - \"Write a script for your video that includes interesting facts and fun trivia about animals. Consider using a conversational tone and including visuals to help tell the story.\"\n3. Storyboarding - \"Create a storyboard for your video, using the images and videos you've collected. Organize the scenes into a logical sequence and consider the pacing and timing of each one.\"\n4. Filming and Recording - \"Use a camera or smartphone to film and record footage of animals in their natural habitats. Consider using a tripod or other stabilizing device to ensure smooth and clear footage.\"\n5. Editing and Finalizing - \"Use video editing software to trim, cut, and arrange the footage into your final video. Add music, sound effects, and captions as needed to enhance the viewing experience. Export the final video in a format suitable for sharing online or on social media.\"",
+  "tasks": [
+    {
+      "id": 1,
+      "title": "Research Animals",
+      "description": "\"Research different types of animals from around the world, including their habitats, behaviors, and unique features. Collect images and videos to use in your video.\"",
+      "completed": false
+    },
+    {
+      "id": 2,
+      "title": "Script Writing",
+      "description": "\"Write a script for your video that includes interesting facts and fun trivia about animals. Consider using a conversational tone and including visuals to help tell the story.\"",
+      "completed": false
+    },
+    {
+      "id": 3,
+      "title": "Storyboarding",
+      "description": "\"Create a storyboard for your video, using the images and videos you've collected. Organize the scenes into a logical sequence and consider the pacing and timing of each one.\"",
+      "completed": false
+    },
+    {
+      "id": 4,
+      "title": "Filming and Recording",
+      "description": "\"Use a camera or smartphone to film and record footage of animals in their natural habitats. Consider using a tripod or other stabilizing device to ensure smooth and clear footage.\"",
+      "completed": false
+    },
+    {
+      "id": 5,
+      "title": "Editing and Finalizing",
+      "description": "\"Use video editing software to trim, cut, and arrange the footage into your final video. Add music, sound effects, and captions as needed to enhance the viewing experience. Export the final video in a format suitable for sharing online or on social media.\"",
+      "completed": false
+    }
+  ]
+}
