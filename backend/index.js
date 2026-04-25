@@ -2,8 +2,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const AuthRouter = require("./Routes/AuthRouter.js");
-const fs = require("fs");
-const path = require("path");
+const Task = require("./Models/Tasks.js");
 
 require("dotenv").config();
 require("./Models/db.js");
@@ -79,16 +78,15 @@ etc.`,
       tasks: tasks,
     };
 
-    const timestamp = Date.now();
-    const filename = `tasks-${timestamp}.json`;
-    const tasksDir = path.join(process.cwd(), "tasks");
-    const filepath = path.join(tasksDir, filename);
+   const savedTask = await Task.create(taskList);
 
-    if (!fs.existsSync(tasksDir)) {
-      fs.mkdirSync(tasksDir);
-    }
+   console.log("💾 Saved to MongoDB:", savedTask._id);
 
-    fs.writeFileSync(filepath, JSON.stringify(taskList, null, 2));
+   res.json({
+     success: true,
+     id: savedTask._id,
+     data: savedTask,
+   });
 
     console.log(`💾 Saved: ${filename}`);
 
@@ -167,7 +165,7 @@ function parseAIResponse(text, userPrompt) {
     }
   }
 
-  // If parsing didn't get 5 tasks, fill with generic ones
+  
   while (tasks.length < 5) {
     const genericTasks = [
       {

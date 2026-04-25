@@ -4,7 +4,7 @@ import { useState } from "react";
 import { handleError, handleSuccess } from "./Utils";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import home from "./Home";
+
 
 function login() {
   const navigate = useNavigate();
@@ -29,7 +29,7 @@ function login() {
     }
 
     try {
-      const url = "http://localhost:8080/auth/login";
+      const url = "http://localhost:3001/auth/login";
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
