@@ -9,6 +9,12 @@ function LeftSidebar() {
         <ul>
           <li>
             <Link
+              to="/client/messages"
+              className="block py-2 px-3 rounded hover:bg-gray-700"
+            >
+              New Project
+            </Link>
+            <Link
               to="/client/home"
               className="block py-2 px-3 rounded hover:bg-gray-700"
             >
@@ -24,12 +30,6 @@ function LeftSidebar() {
             </Link>
           </li>
           <li>
-            <Link
-              to="/client/messages"
-              className="block py-2 px-3 rounded hover:bg-gray-700"
-            >
-              messages
-            </Link>
           </li>
 
           <hr className="border-t border-[#d7d7d7] m-4" />

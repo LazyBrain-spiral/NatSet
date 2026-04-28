@@ -9,9 +9,6 @@ require("./Models/db.js");
 
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
-app.use(express.json());
-
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
@@ -45,56 +42,71 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-            content: `Break down this goal into exactly 5 specific, actionable tasks: "${userPrompt}"
 
-List them as numbered items, each with a title and brief description.
-Format: 
-1. Title - Description
-2. Title - Description
-etc.`,
+            content: `You are a project manager breaking down a client's goal into exactly 5 freelancer-ready tasks.
+
+                      Goal: "${userPrompt}"
+
+                      Each task must be written as a clear work order that a freelancer can pick up and execute independently — no prior context assumed.
+
+                      Requirements:
+                      - Each task is self-contained with a defined scope, so a freelancer knows exactly what to build or deliver
+                      - Include acceptance criteria (what "done" looks like) for each task
+                      - Specify any inputs the freelancer will need (e.g. designs, APIs, credentials, assets)
+                      - Tasks must be logically sequenced so output of one can feed into the next
+                      - No vague tasks like "research", "set up", "review", "finalization", or "launch" — every task must produce a concrete deliverable
+                      - The 5th task must be a real deliverable, NOT a wrap-up like "finalization", "launch", "review", or "deploy"
+                      - Written in plain, professional language a non-technical client could also understand
+
+                      Output format strictly (follow this exactly, no deviations):
+                      Project Title: A short 5-word max professional title for this project.
+
+                      1. Task Title
+                      Summary: One sentence describing the deliverable.
+                      Scope: What exactly needs to be done.
+                      Inputs: What the freelancer needs to start (designs, APIs, credentials, etc.).
+                      Deliverable: The specific file, feature, or artifact they hand back.
+
+                      2. Task Title
+                      Summary: ...
+                      Scope: ...
+                      Inputs: ...
+                      Deliverable: ...
+
+                      3. Task Title
+                      ...
+
+                      4. Task Title
+                      ...
+
+                      5. Task Title
+                      ...
+
+                      Only output the list. No intros, no explanations, no extra commentary.`,
           },
         ],
         stream: false,
       }),
     });
 
-    if (!ollamaRes.ok) {
-      throw new Error("Ollama API error");
-    }
+    if (!ollamaRes.ok) throw new Error("Ollama API error");
 
     const data = await ollamaRes.json();
     const aiResponse = data?.message?.content || "";
-
     console.log("🤖 AI Response:", aiResponse);
 
-    const tasks = parseAIResponse(aiResponse, userPrompt);
-
+    const {tasks,projectTitle} = parseAIResponse(aiResponse, userPrompt);
     console.log("✅ Parsed tasks:", tasks);
 
     const taskList = {
       prompt: userPrompt,
+      title: projectTitle,
       createdAt: new Date().toISOString(),
       aiResponse: aiResponse,
       tasks: tasks,
     };
 
-   const savedTask = await Task.create(taskList);
-
-   console.log("💾 Saved to MongoDB:", savedTask._id);
-
-   res.json({
-     success: true,
-     id: savedTask._id,
-     data: savedTask,
-   });
-
-    console.log(`💾 Saved: ${filename}`);
-
-    res.json({
-      success: true,
-      filename,
-      data: taskList,
-    });
+    res.json({ success: true, data: taskList });
   } catch (err) {
     console.error("❌ Error:", err.message);
 
@@ -142,67 +154,137 @@ etc.`,
     });
   }
 });
+function generateTitle(prompt) {
+  const trimmed = prompt.trim();
+  const short = trimmed.length > 60 ? trimmed.slice(0, 57) + "..." : trimmed;
+  return short.charAt(0).toUpperCase() + short.slice(1);
+}
 
 
 function parseAIResponse(text, userPrompt) {
-  const lines = text.split("\n").filter((line) => line.trim());
   const tasks = [];
+    const titleMatch = text.match(/^Project Title:\s*(.+)/m);
+    const projectTitle = titleMatch
+      ? titleMatch[1].trim()
+      : generateTitle(userPrompt);
 
-  for (const line of lines) {
-    const match = line.match(/^(\d+)[\.\)]\s*(.+?)[\.\-:\;]\s*(.+)$/);
-
-    if (match && tasks.length < 5) {
-      const id = parseInt(match[1]);
-      const title = match[2].trim();
-      const description = match[3].trim();
-
-      tasks.push({
-        id: id,
-        title: title,
-        description: description,
-        completed: false,
-      });
-    }
-  }
+    
+    const bodyText = text.replace(/^Project Title:.+\n?/m, "");
+    const blocks = bodyText.split(/(?=^\d+\.\s)/m).filter((b) => b.trim());
 
   
-  while (tasks.length < 5) {
-    const genericTasks = [
-      {
-        title: "Research and Planning",
-        description: `Research requirements for: ${userPrompt}`,
-      },
-      {
-        title: "Setup and Preparation",
-        description: "Gather necessary tools and resources",
-      },
-      {
-        title: "Core Implementation",
-        description: "Build the main components",
-      },
-      {
-        title: "Testing and Refinement",
-        description: "Test thoroughly and make improvements",
-      },
-      {
-        title: "Finalization and Launch",
-        description: "Complete and deploy the final result",
-      },
-    ];
+  
 
-    const nextTask = genericTasks[tasks.length];
+  for (const block of blocks) {
+    if (tasks.length >= 5) break;
+
+    
+    const titleMatch = block.match(/^(\d+)\.\s+(.+)/m);
+    if (!titleMatch) continue;
+
+    const id = parseInt(titleMatch[1]);
+    const title = titleMatch[2].trim();
+
+    
+    const summary = extractField(block, "Summary");
+    const scope = extractField(block, "Scope");
+    const inputs = extractField(block, "Inputs");
+    const deliverable = extractField(block, "Deliverable");
+
+    
+    const descriptionParts = [];
+    if (summary) descriptionParts.push(summary);
+    if (scope) descriptionParts.push(`Scope: ${scope}`);
+    if (inputs) descriptionParts.push(`Inputs: ${inputs}`);
+    if (deliverable) descriptionParts.push(`Deliverable: ${deliverable}`);
+
     tasks.push({
-      id: tasks.length + 1,
-      title: nextTask.title,
-      description: nextTask.description,
+      id,
+      title,
+      summary: summary || "",
+      scope: scope || "",
+      inputs: inputs || "",
+      deliverable: deliverable || "",
+      
+      description: descriptionParts.join(" | "),
       completed: false,
     });
   }
 
-  return tasks.slice(0, 5);
+  
+  const genericTasks = [
+    {
+      title: "Define Project Requirements",
+      description: `Document all functional requirements for: ${userPrompt}`,
+    },
+    {
+      title: "Create Technical Specification",
+      description: "Write a detailed spec the freelancer can follow",
+    },
+    {
+      title: "Build Core Feature",
+      description: "Implement the primary functionality",
+    },
+    {
+      title: "Integrate and Connect Modules",
+      description: "Wire all components together and verify data flow",
+    },
+    {
+      title: "Deliver Tested Build",
+      description: "Hand off a tested, documented, ready-to-use build",
+    },
+  ];
+
+  while (tasks.length < 5) {
+    const next = genericTasks[tasks.length];
+    tasks.push({
+      id: tasks.length + 1,
+      title: next.title,
+      summary: next.description,
+      scope: "",
+      inputs: "",
+      deliverable: "",
+      description: next.description,
+      completed: false,
+    });
+  }
+
+  return { tasks: tasks.slice(0, 5), projectTitle };
 }
 
+
+function extractField(block, fieldName) {
+  const pattern = new RegExp(
+    `${fieldName}:\\s*([\\s\\S]*?)(?=\\n(?:Summary|Scope|Inputs|Deliverable):|$)`,
+    "i",
+  );
+  const match = block.match(pattern);
+  return match ? match[1].replace(/\n/g, " ").trim() : "";
+}
+
+app.post("/save", async (req, res) => {
+  const { data } = req.body;
+  try {
+    const savedTask = await Task.create(data);
+    console.log("💾 Saved to MongoDB:", savedTask._id);
+    res.json({ success: true, id: savedTask._id });
+  } catch (err) {
+    console.error("❌ Save error:", err.message);
+    res.status(500).json({ error: "Failed to save" });
+  }
+});
+app.get("/tasks", async (req, res) => {
+  try {
+    const data = await Task.find();
+    console.log("📂 Fetched tas");
+    res.json(data);
+  } catch (err) {
+    console.error(" Error fetching tasks:", err.message);
+    res.status(500).json({ error: "Failed to fetch tasks" });
+  }
+});
+
 app.listen(PORT, () => {
-  console.log(` Backend running at http://localhost:${PORT}`);
-  console.log(`   Make sure Ollama is running: ollama run llama2`);
+  console.log(`Backend running at http://localhost:${PORT}`);
+  console.log(`Make sure Ollama is running: ollama run llama2`);
 });

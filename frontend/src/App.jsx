@@ -5,7 +5,8 @@ import Signup from "./Signup";
 import Login from "./Login";
 import OllamaChat from "./Ollamachat";
 import ClientLayout from "./Client/ClientLayout";
-import ClientDashboard from "./Client/ClientDashboard"; // Import the child
+import ClientDashboard from "./Client/ClientDashboard"; 
+import OllamaNewTask from "./Client/OllamaNewTask";
 
 export default function App() {
   return (
@@ -19,6 +20,8 @@ export default function App() {
         
         <Route path="/client" element={<ClientLayout />}>
           <Route path="home" element={<ClientDashboard />} />
+          <Route path="messages" element={<OllamaNewTask />} />
+          
           
         </Route>
       </Routes>
