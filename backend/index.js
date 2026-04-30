@@ -276,7 +276,7 @@ app.post("/save", async (req, res) => {
 app.get("/tasks", async (req, res) => {
   try {
     const data = await Task.find();
-    console.log("📂 Fetched tas");
+    console.log("Fetched task");
     res.json(data);
   } catch (err) {
     console.error(" Error fetching tasks:", err.message);
