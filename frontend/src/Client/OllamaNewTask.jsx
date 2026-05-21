@@ -35,7 +35,7 @@ export default function OllamaChat() {
           { role: "assistant", content: `⚠️ ${data.error}` },
         ]);
       } else if (data.success) {
-        setPendingTasks(data.data); // store for later save
+        setPendingTasks(data.data); 
         setMessages((prev) => [
           ...prev,
           {
