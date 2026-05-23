@@ -17,12 +17,7 @@ function ClientProject() {
         const initialTasks = data.tasks.map((task, index) => ({
           ...task,
           price: pricePerTask * (index + 1),
-          status:
-            index < 2
-              ? "completed"
-              : index === 2
-                ? "in_progress"
-                : "not_started",
+          status: task.status || "not_started",
         }));
         setTasks(initialTasks);
       } catch (error) {
@@ -36,10 +31,28 @@ function ClientProject() {
     setTasks((prev) =>
       prev.map((t) => {
         if (t.id !== taskId) return t;
-        if (t.status === "completed") return { ...t, status: "not_started" };
-        if (t.status === "not_started") return { ...t, status: "in_progress" };
-        if (t.status === "in_progress") return { ...t, status: "completed" };
-        return t;
+        let newStatus;
+          if (t.status ===  'not_started')
+            {
+            newStatus = 'in_progress'; 
+        }
+          if (t.status ===  'in_progress')
+            {
+            newStatus = 'completed'; 
+        }
+          if (t.status ===  'completed')
+            {
+            newStatus = 'not_started'; 
+        }
+
+        fetch(`http://localhost:3001/tasks/${id}`,{
+          method: "PATCH",
+          headers : {'Content-type': 'application/json'},
+          body : JSON.stringify({taskId , status:newStatus})
+        });
+
+        return { ...t ,  status:newStatus};
+
       }),
     );
   };
@@ -47,6 +60,15 @@ function ClientProject() {
   if (!project) {
     return <div className="text-white p-10">Loading project...</div>;
   }
+  // if (!project.assigned) {
+  //   return (
+  //     <div className="flex-1 p-10 text-white">
+  //       <h1 className="text-4xl font-bold mb-2">{project.title}</h1>
+  //       <p className="text-gray-400 mb-8">{project.prompt}</p>
+  //       <p className="text-gray-500">This project has not been assigned yet.</p>
+  //     </div>
+  //   );
+  // }
 
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const totalTasks = tasks.length;

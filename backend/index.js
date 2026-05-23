@@ -302,6 +302,21 @@ app.get('/tasks/:id', async (req, res) => {
     res.status(500).json({ error: "Server error" });
   }
 });
+app.patch("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+  const { taskId, status } = req.body;
+
+  try {
+    const project = await Task.findByIdAndUpdate(
+      id,
+      { $set: { "tasks.$[task].status": status } },
+      { arrayFilters: [{ "task.id": taskId }], new: true },
+    );
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 app.listen(PORT, () => {
   console.log(`Backend running at http://localhost:${PORT}`);
