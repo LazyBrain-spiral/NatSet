@@ -2,37 +2,28 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const AuthRouter = require("./Routes/AuthRouter.js");
-const Task = require("./Models/Tasks.js");
+const TaskRouter = require("./Routes/TaskRouter.js");
 
 require("dotenv").config();
 require("./Models/db.js");
 
 const PORT = process.env.PORT || 3001;
 
-app.get("/ping", (req, res) => {
-  res.send("pong");
-});
+app.use(cors({ origin: "http://localhost:5173" }));
+app.use(express.json());
+
+app.get("/ping", (req, res) => res.send("pong"));
 
 app.use("/auth", AuthRouter);
-
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-  }),
-);
-app.use(express.json());
+app.use("/tasks", TaskRouter);
 
 app.post("/chat", async (req, res) => {
   const { messages } = req.body;
-
   if (!messages || !Array.isArray(messages)) {
     return res.status(400).json({ error: "messages array is required" });
   }
-
   const userPrompt = messages[messages.length - 1].content;
-
   console.log("Creating tasks for:", userPrompt);
-
   try {
     const ollamaRes = await fetch("http://localhost:11434/api/chat", {
       method: "POST",
@@ -42,7 +33,6 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "user",
-
             content: `You are a project manager breaking down a client's goal into exactly 5 freelancer-ready tasks.
 
                       Goal: "${userPrompt}"
@@ -88,116 +78,108 @@ app.post("/chat", async (req, res) => {
         stream: false,
       }),
     });
-
     if (!ollamaRes.ok) throw new Error("Ollama API error");
-
     const data = await ollamaRes.json();
     const aiResponse = data?.message?.content || "";
     console.log("🤖 AI Response:", aiResponse);
-
-    const {tasks,projectTitle} = parseAIResponse(aiResponse, userPrompt);
+    const { tasks, projectTitle } = parseAIResponse(aiResponse, userPrompt);
     console.log("✅ Parsed tasks:", tasks);
-
-    const taskList = {
-      prompt: userPrompt,
-      title: projectTitle,
-      createdAt: new Date().toISOString(),
-      aiResponse: aiResponse,
-      tasks: tasks,
-    };
-
-    res.json({ success: true, data: taskList });
-  } catch (err) {
-    console.error("❌ Error:", err.message);
-
-    const fallbackTasks = {
-      prompt: userPrompt,
-      createdAt: new Date().toISOString(),
-      tasks: [
-        {
-          id: 1,
-          title: "Research and Planning",
-          description: `Research requirements for: ${userPrompt}`,
-          completed: false,
-        },
-        {
-          id: 2,
-          title: "Setup and Configuration",
-          description: "Set up necessary tools and environment",
-          completed: false,
-        },
-        {
-          id: 3,
-          title: "Core Development",
-          description: "Build the main functionality",
-          completed: false,
-        },
-        {
-          id: 4,
-          title: "Testing and Refinement",
-          description: "Test and fix any issues",
-          completed: false,
-        },
-        {
-          id: 5,
-          title: "Deployment and Launch",
-          description: "Deploy and make it live",
-          completed: false,
-        },
-      ],
-    };
-
     res.json({
       success: true,
-      filename: "fallback-tasks.json",
-      data: fallbackTasks,
+      data: {
+        prompt: userPrompt,
+        title: projectTitle,
+        createdAt: new Date().toISOString(),
+        aiResponse,
+        tasks,
+      },
+    });
+  } catch (err) {
+    console.error("❌ Error:", err.message);
+    res.json({
+      success: true,
+      data: {
+        prompt: userPrompt,
+        createdAt: new Date().toISOString(),
+        tasks: [
+          {
+            id: 1,
+            title: "Research and Planning",
+            description: `Research requirements for: ${userPrompt}`,
+            completed: false,
+          },
+          {
+            id: 2,
+            title: "Setup and Configuration",
+            description: "Set up necessary tools and environment",
+            completed: false,
+          },
+          {
+            id: 3,
+            title: "Core Development",
+            description: "Build the main functionality",
+            completed: false,
+          },
+          {
+            id: 4,
+            title: "Testing and Refinement",
+            description: "Test and fix any issues",
+            completed: false,
+          },
+          {
+            id: 5,
+            title: "Deployment and Launch",
+            description: "Deploy and make it live",
+            completed: false,
+          },
+        ],
+      },
     });
   }
 });
+
+app.post("/save", async (req, res) => {
+  const Task = require("./Models/Tasks.js");
+  const { data } = req.body;
+  try {
+    const savedTask = await Task.create(data);
+    console.log("💾 Saved to MongoDB:", savedTask._id);
+    res.json({ success: true, id: savedTask._id });
+  } catch (err) {
+    console.error("❌ Save error:", err.message);
+    res.status(500).json({ error: "Failed to save" });
+  }
+});
+
 function generateTitle(prompt) {
   const trimmed = prompt.trim();
   const short = trimmed.length > 60 ? trimmed.slice(0, 57) + "..." : trimmed;
   return short.charAt(0).toUpperCase() + short.slice(1);
 }
 
-
 function parseAIResponse(text, userPrompt) {
   const tasks = [];
-    const titleMatch = text.match(/^Project Title:\s*(.+)/m);
-    const projectTitle = titleMatch
-      ? titleMatch[1].trim()
-      : generateTitle(userPrompt);
-
-    
-    const bodyText = text.replace(/^Project Title:.+\n?/m, "");
-    const blocks = bodyText.split(/(?=^\d+\.\s)/m).filter((b) => b.trim());
-
-  
-  
-
+  const titleMatch = text.match(/^Project Title:\s*(.+)/m);
+  const projectTitle = titleMatch
+    ? titleMatch[1].trim()
+    : generateTitle(userPrompt);
+  const bodyText = text.replace(/^Project Title:.+\n?/m, "");
+  const blocks = bodyText.split(/(?=^\d+\.\s)/m).filter((b) => b.trim());
   for (const block of blocks) {
     if (tasks.length >= 5) break;
-
-    
     const titleMatch = block.match(/^(\d+)\.\s+(.+)/m);
     if (!titleMatch) continue;
-
     const id = parseInt(titleMatch[1]);
     const title = titleMatch[2].trim();
-
-    
     const summary = extractField(block, "Summary");
     const scope = extractField(block, "Scope");
     const inputs = extractField(block, "Inputs");
     const deliverable = extractField(block, "Deliverable");
-
-    
     const descriptionParts = [];
     if (summary) descriptionParts.push(summary);
     if (scope) descriptionParts.push(`Scope: ${scope}`);
     if (inputs) descriptionParts.push(`Inputs: ${inputs}`);
     if (deliverable) descriptionParts.push(`Deliverable: ${deliverable}`);
-
     tasks.push({
       id,
       title,
@@ -205,13 +187,10 @@ function parseAIResponse(text, userPrompt) {
       scope: scope || "",
       inputs: inputs || "",
       deliverable: deliverable || "",
-      
       description: descriptionParts.join(" | "),
       completed: false,
     });
   }
-
-  
   const genericTasks = [
     {
       title: "Define Project Requirements",
@@ -234,7 +213,6 @@ function parseAIResponse(text, userPrompt) {
       description: "Hand off a tested, documented, ready-to-use build",
     },
   ];
-
   while (tasks.length < 5) {
     const next = genericTasks[tasks.length];
     tasks.push({
@@ -248,10 +226,8 @@ function parseAIResponse(text, userPrompt) {
       completed: false,
     });
   }
-
   return { tasks: tasks.slice(0, 5), projectTitle };
 }
-
 
 function extractField(block, fieldName) {
   const pattern = new RegExp(
@@ -261,62 +237,6 @@ function extractField(block, fieldName) {
   const match = block.match(pattern);
   return match ? match[1].replace(/\n/g, " ").trim() : "";
 }
-
-app.post("/save", async (req, res) => {
-  const { data } = req.body;
-  try {
-    const savedTask = await Task.create(data);
-    console.log("💾 Saved to MongoDB:", savedTask._id);
-    res.json({ success: true, id: savedTask._id });
-  } catch (err) {
-    console.error("❌ Save error:", err.message);
-    res.status(500).json({ error: "Failed to save" });
-  }
-});
-app.get("/tasks", async (req, res) => {
-  try {
-    const data = await Task.find();
-    console.log("Fetched task");
-    res.json(data);
-  } catch (err) {
-    console.error(" Error fetching tasks:", err.message);
-    res.status(500).json({ error: "Failed to fetch tasks" });
-  }
-});
-
-
-app.get('/tasks/:id', async (req, res) => {
-  try {
-    const { id } = req.params;
-    
-
-    const project = await Task.findById(id); 
-
-    if (!project) {
-      return res.status(404).json({ error: "Project not found" });
-    }
-
-    res.json(project);
-  } catch (error) {
-    console.error("Error fetching project:", error);
-    res.status(500).json({ error: "Server error" });
-  }
-});
-app.patch("/tasks/:id", async (req, res) => {
-  const { id } = req.params;
-  const { taskId, status } = req.body;
-
-  try {
-    const project = await Task.findByIdAndUpdate(
-      id,
-      { $set: { "tasks.$[task].status": status } },
-      { arrayFilters: [{ "task.id": taskId }], new: true },
-    );
-    res.json(project);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 app.listen(PORT, () => {
   console.log(`Backend running at http://localhost:${PORT}`);
