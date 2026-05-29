@@ -5,6 +5,7 @@ function ClientProject() {
   const { id } = useParams();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+  const [freelancer, setFreelancer] = useState(null);
 
   useEffect(() => {
     async function fetchProject() {
@@ -12,11 +13,18 @@ function ClientProject() {
         const response = await fetch(`http://localhost:3001/tasks/${id}`);
         const data = await response.json();
         setProject(data);
+        if (data.freelancerId) {
+          const fRes = fetch(
+            `http://localhost:3001/freelancers0/${data.freelancerId}`,
+          );
+          const fData = await fRes.json();
+          setFreelancer(fData);
+        }
 
         const pricePerTask = 80;
-        const initialTasks = data.tasks.map((task, index) => ({
+        const initialTasks = data.tasks.map((task) => ({
           ...task,
-          price: pricePerTask * (index + 1),
+          price: task.price || 0,
           status: task.status || "not_started",
         }));
         setTasks(initialTasks);
@@ -32,27 +40,23 @@ function ClientProject() {
       prev.map((t) => {
         if (t.id !== taskId) return t;
         let newStatus;
-          if (t.status ===  'not_started')
-            {
-            newStatus = 'in_progress'; 
+        if (t.status === "not_started") {
+          newStatus = "in_progress";
         }
-          if (t.status ===  'in_progress')
-            {
-            newStatus = 'completed'; 
+        if (t.status === "in_progress") {
+          newStatus = "completed";
         }
-          if (t.status ===  'completed')
-            {
-            newStatus = 'not_started'; 
+        if (t.status === "completed") {
+          newStatus = "not_started";
         }
 
-        fetch(`http://localhost:3001/tasks/${id}`,{
+        fetch(`http://localhost:3001/tasks/${id}`, {
           method: "PATCH",
-          headers : {'Content-type': 'application/json'},
-          body : JSON.stringify({taskId , status:newStatus})
+          headers: { "Content-type": "application/json" },
+          body: JSON.stringify({ taskId, status: newStatus }),
         });
 
-        return { ...t ,  status:newStatus};
-
+        return { ...t, status: newStatus };
       }),
     );
   };
@@ -79,10 +83,10 @@ function ClientProject() {
     .filter((t) => t.status === "completed")
     .reduce((sum, t) => sum + t.price, 0);
 
-  const freelancer = project.freelancer || {
-    name: "Rahul Verma",
-    role: "Frontend Developer",
-    rating: 4.8,
+  const freelancerData = freelancer || {
+    name: "Unassigned",
+    role: "No freelancer yet",
+    rating: null,
     avatar: null,
   };
 
@@ -120,13 +124,10 @@ function ClientProject() {
 
   return (
     <div className="flex-1 p-10 text-white h-screen overflow-y-auto">
-      
       <h1 className="text-4xl font-bold mb-2">{project.title}</h1>
       <p className="text-gray-400 mb-8">{project.prompt}</p>
 
-      
       <div className="bg-[#111827] border border-white/10 rounded-xl p-5 mb-8 grid grid-cols-4 gap-6">
-        
         <div>
           <p className="text-gray-400 text-sm mb-1">Progress</p>
           <p className="text-purple-400 text-2xl font-bold mb-2">
@@ -143,38 +144,36 @@ function ClientProject() {
           </p>
         </div>
 
-        
         <div className="border-l border-white/10 pl-6">
           <p className="text-gray-400 text-sm mb-2">Assigned Freelancer</p>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
-              {freelancer.avatar ? (
+              {freelancerData.avatar ? (
                 <img
-                  src={freelancer.avatar}
+                  src={freelancerData.avatar}
                   className="w-full h-full rounded-full object-cover"
-                  alt={freelancer.name}
+                  alt={freelancerData.name}
                 />
               ) : (
-                freelancer.name
+                freelancerData.name
                   .split(" ")
                   .map((n) => n[0])
                   .join("")
               )}
             </div>
             <div>
-              <p className="font-semibold text-sm">{freelancer.name}</p>
-              <p className="text-gray-400 text-xs">{freelancer.role}</p>
+              <p className="font-semibold text-sm">{freelancerData.name}</p>
+              <p className="text-gray-400 text-xs">{freelancerData.role}</p>
               <div className="flex items-center gap-1 mt-0.5">
                 <span className="text-yellow-400 text-xs">★</span>
                 <span className="text-gray-400 text-xs">
-                  {freelancer.rating}
+                  {freelancerData.rating}
                 </span>
               </div>
             </div>
           </div>
         </div>
 
-        
         <div className="border-l border-white/10 pl-6">
           <p className="text-gray-400 text-sm mb-1">Earned / Total Value</p>
           <p className="text-2xl font-bold mb-2">
@@ -195,7 +194,6 @@ function ClientProject() {
           </p>
         </div>
 
-        
         <div className="border-l border-white/10 pl-6 flex items-center gap-3">
           <div className="text-purple-400 text-2xl">📅</div>
           <div>
@@ -207,7 +205,6 @@ function ClientProject() {
         </div>
       </div>
 
-     
       <div className="space-y-4">
         {tasks.map((task) => {
           const statusStyle = getStatusStyle(task.status);
@@ -223,7 +220,6 @@ function ClientProject() {
                   : "border-white/10"
               }`}
             >
-              
               <button
                 onClick={() => toggleTask(task.id)}
                 className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 cursor-pointer ${toggleStyle}`}
@@ -248,7 +244,6 @@ function ClientProject() {
                 )}
               </button>
 
-              
               <div className="flex-1 min-w-0">
                 <h2
                   className={`text-lg font-semibold ${isCompleted ? "line-through text-gray-500" : "text-white"}`}
@@ -263,7 +258,6 @@ function ClientProject() {
                 </p>
               </div>
 
-             
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <p className="text-base font-semibold">
                   <span className="text-green-400">

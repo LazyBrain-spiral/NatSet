@@ -6,6 +6,7 @@ export default function OllamaChat() {
   const [loading, setLoading] = useState(false);
   const [pendingTasks, setPendingTasks] = useState(null); 
   const bottomRef = useRef(null);
+  const [budget, setBudget] = useState("");
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,7 +25,7 @@ export default function OllamaChat() {
       const res = await fetch("http://localhost:3001/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({ messages: newMessages , budget:budget }),
       });
 
       const data = await res.json();
@@ -173,7 +174,6 @@ export default function OllamaChat() {
                     </div>
                   ))}
 
-                  {/* Buttons only show while awaiting confirm */}
                   {msg.awaitingConfirm && (
                     <div className="flex gap-2 mt-3">
                       <button
@@ -217,17 +217,26 @@ export default function OllamaChat() {
       <div className="flex gap-2 p-4 border-t border-gray-800">
         <input
           type="text"
-          className="flex-1 px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-gray-700"
+          className="flex-[3] px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-gray-700"
           placeholder="What do you want to accomplish?"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           disabled={loading || !!pendingTasks}
         />
+        <input
+          type="number"
+          className="flex-1 px-4 py-3 bg-gray-900 border border-gray-800 rounded-lg text-white placeholder-gray-600 focus:outline-none focus:border-gray-700 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]"
+          placeholder="Budget"
+          value={budget}
+          onChange={(e) => setBudget(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+          disabled={loading || !!pendingTasks ||!budget}
+        />
         <button
-          className="w-12 h-12 bg-green-500 text-black rounded-lg font-bold hover:bg-green-400 disabled:opacity-30 disabled:cursor-not-allowed"
+          className="w-12 h-12 bg-green-500 text-black rounded-lg font-bold hover:bg-green-400 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"
           onClick={sendMessage}
-          disabled={!input.trim() || loading || !!pendingTasks}
+          disabled={!input.trim() || !budget || loading || !!pendingTasks}
         >
           ↑
         </button>

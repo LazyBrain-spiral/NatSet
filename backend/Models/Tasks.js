@@ -14,6 +14,7 @@ const taskSchema = new mongoose.Schema({
       inputs: String,
       deliverable: String,
       description: String,
+      price : Number,
       status: {
         type: String,
         enum: ["not_started", "in_progress", "completed"],
@@ -21,6 +22,7 @@ const taskSchema = new mongoose.Schema({
       },
     },
   ],
+  freelancerId: String,
 });
 
 module.exports = mongoose.model("Task", taskSchema);
