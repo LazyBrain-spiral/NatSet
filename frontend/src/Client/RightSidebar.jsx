@@ -7,7 +7,7 @@ function RightSidebar() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const response = await fetch("http://localhost:3001/tasks");
+        const response = await fetch("http://localhost:3001/projects");
         const data = await response.json();
         setProjects(data);
       } catch (error) {

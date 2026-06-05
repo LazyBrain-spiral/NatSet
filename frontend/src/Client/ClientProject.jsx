@@ -10,18 +10,18 @@ function ClientProject() {
   useEffect(() => {
     async function fetchProject() {
       try {
-        const response = await fetch(`http://localhost:3001/tasks/${id}`);
+        const response = await fetch(`http://localhost:3001/projects/${id}`);
         const data = await response.json();
         setProject(data);
         if (data.freelancerId) {
-          const fRes = fetch(
-            `http://localhost:3001/freelancers0/${data.freelancerId}`,
+          const fRes = await fetch(
+            `http://localhost:3001/freelancers/${data.freelancerId}`,
           );
           const fData = await fRes.json();
           setFreelancer(fData);
         }
 
-        const pricePerTask = 80;
+        
         const initialTasks = data.tasks.map((task) => ({
           ...task,
           price: task.price || 0,
@@ -50,7 +50,7 @@ function ClientProject() {
           newStatus = "not_started";
         }
 
-        fetch(`http://localhost:3001/tasks/${id}`, {
+        fetch(`http://localhost:3001/projects/${id}`, {
           method: "PATCH",
           headers: { "Content-type": "application/json" },
           body: JSON.stringify({ taskId, status: newStatus }),
@@ -64,15 +64,7 @@ function ClientProject() {
   if (!project) {
     return <div className="text-white p-10">Loading project...</div>;
   }
-  // if (!project.assigned) {
-  //   return (
-  //     <div className="flex-1 p-10 text-white">
-  //       <h1 className="text-4xl font-bold mb-2">{project.title}</h1>
-  //       <p className="text-gray-400 mb-8">{project.prompt}</p>
-  //       <p className="text-gray-500">This project has not been assigned yet.</p>
-  //     </div>
-  //   );
-  // }
+
 
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const totalTasks = tasks.length;
@@ -251,8 +243,18 @@ function ClientProject() {
                   {task.title}
                 </h2>
                 <p className="text-gray-400 mt-1 text-sm leading-relaxed">
-                  {task.description}
+                  {task.summary}
                 </p>
+                {task.scope && (
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="text-white/50">Scope:</span> {task.scope}
+                  </p>
+                )}
+                {task.inputs && (
+                  <p className="text-gray-400 text-sm mt-1">
+                    <span className="text-white/50">Inputs:</span> {task.inputs}
+                  </p>
+                )}
                 <p className="mt-3 text-sm text-purple-400">
                   Deliverable: {task.deliverable}
                 </p>

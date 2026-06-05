@@ -14,7 +14,7 @@ export default function OllamaChat() {
 
   const sendMessage = async () => {
     const text = input.trim();
-    if (!text || loading) return;
+    if (!text || loading || !budget) return;
 
     const newMessages = [...messages, { role: "user", content: text }];
     setMessages(newMessages);
@@ -166,9 +166,21 @@ export default function OllamaChat() {
                           <div className="font-semibold text-white text-sm">
                             {task.title}
                           </div>
-                          <div className="text-gray-400 text-xs mt-1">
-                            {task.description}
-                          </div>
+                          <p className="text-gray-400 mt-1 text-sm leading-relaxed">
+                            {task.summary}
+                          </p>
+                          {task.scope && (
+                            <p className="text-gray-400 text-sm mt-1">
+                              <span className="text-white/50">Scope:</span>{" "}
+                              {task.scope}
+                            </p>
+                          )}
+                          {task.inputs && (
+                            <p className="text-gray-400 text-sm mt-1">
+                              <span className="text-white/50">Inputs:</span>{" "}
+                              {task.inputs}
+                            </p>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -231,7 +243,7 @@ export default function OllamaChat() {
           value={budget}
           onChange={(e) => setBudget(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          disabled={loading || !!pendingTasks ||!budget}
+          disabled={loading || !!pendingTasks}
         />
         <button
           className="w-12 h-12 bg-green-500 text-black rounded-lg font-bold hover:bg-green-400 disabled:opacity-30 disabled:cursor-not-allowed shrink-0"

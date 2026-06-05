@@ -16,7 +16,7 @@ app.use(express.json());
 app.get("/ping", (req, res) => res.send("pong"));
 
 app.use("/auth", AuthRouter);
-app.use("/tasks", TaskRouter);
+app.use("/projects", TaskRouter);
 
 app.post("/chat", async (req, res) => {
   const { messages, budget } = req.body;
