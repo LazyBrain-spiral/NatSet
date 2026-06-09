@@ -34,5 +34,18 @@ const updateTaskStatus = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+const getAvailableTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({
+      assigned: false,
+    });
 
-module.exports = { getAllTasks, getTaskById, updateTaskStatus };
+    res.json(tasks);
+  } catch (error) {
+    res.status(500).json({
+      error: error.message,
+    });
+  }
+};
+
+module.exports = { getAllTasks, getTaskById, updateTaskStatus, getAvailableTasks };

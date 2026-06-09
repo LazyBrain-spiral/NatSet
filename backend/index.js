@@ -108,6 +108,7 @@ app.post("/chat", async (req, res) => {
         createdAt: new Date().toISOString(),
         aiResponse,
         tasks,
+        assigned:false,
       },
     });
   } catch (err) {
