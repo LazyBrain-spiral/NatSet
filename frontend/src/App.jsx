@@ -9,6 +9,7 @@ import OllamaNewTask from "./Client/OllamaNewTask";
 import ClientProject from "./Client/ClientProject";
 import FreelancerLayout from "./Freelancer/FreelancerLayout";
 import FreelancerDashboard from "./Freelancer/FreelancerDashboard";
+import ProtectedRoute from "./ProtectedRoute";
 
 export default function App() {
   return (
@@ -19,15 +20,28 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/chat" element={<OllamaChat />} />
 
-        <Route path="/client" element={<ClientLayout />}>
+        <Route
+          path="/client"
+          element={
+            <ProtectedRoute allowedRole="client">
+              <ClientLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="home" element={<ClientDashboard />} />
           <Route path="messages" element={<OllamaNewTask />} />
           <Route path="projects/:id" element={<ClientProject />} />
         </Route>
 
-        <Route path="/freelancer" element={<FreelancerLayout />}>
+        <Route
+          path="/freelancer"
+          element={
+            <ProtectedRoute allowedRole="freelancer">
+              <FreelancerLayout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="home" element={<FreelancerDashboard />} />
-          <Route path="messages" element={<OllamaNewTask />} />
         </Route>
       </Routes>
     </Router>

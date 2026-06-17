@@ -11,6 +11,7 @@ function Signup() {
     name: "",
     email: "",
     password: "",
+    role : "client"
   });
 
   const handleChange = (e) => {
@@ -22,10 +23,10 @@ function Signup() {
 
   const handleSignup = async (e) => {
     e.preventDefault();
-    const { name, email, password } = SignupInfo;
+    const { name, email, password,role } = SignupInfo;
 
-    if (!name || !email || !password) {
-      return handleError("Please fill all the fields"); // ✅ return stops execution
+    if (!name || !email || !password || !role) {
+      return handleError("Please fill all the fields"); 
     }
 
     try {
@@ -39,7 +40,7 @@ function Signup() {
       const { success, message } = data;
       if (success) {
         handleSuccess(message);
-        setSignupInfo({ name: "", email: "", password: "" });
+        setSignupInfo({ name: "", email: "", password: "",role : "client" });
         setTimeout(() => {
           navigate("/login");
         }, 1000);
@@ -93,6 +94,18 @@ function Signup() {
               <a href="#" className="text-sm text-blue-400 hover:text-blue-300">
                 Forgot your password?
               </a>
+            </label>
+            <label className="text-white">
+              <p className="text-gray-500">I am a:</p>
+              <select
+                name="role"
+                value={SignupInfo.role}
+                onChange={handleChange}
+                className="w-full px-3 py-2 rounded-md bg-gray-900 border border-gray-600 text-white focus:outline-none focus:border-gray-400"
+              >
+                <option value="client">Client</option>
+                <option value="freelancer">Freelancer</option>
+              </select>
             </label>
             <input
               className="w-full px-3 py-2 rounded-md bg-gray-900 border border-gray-600 text-white focus:outline-none focus:border-gray-400 hover:bg-amber-400 cursor-alias"

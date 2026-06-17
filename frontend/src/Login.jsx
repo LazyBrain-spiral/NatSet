@@ -25,7 +25,7 @@ function login() {
     const { email, password } = loginInfo;
 
     if (!email || !password) {
-      return handleError("Please fill all the fields"); // ✅ return stops execution
+      return handleError("Please fill all the fields"); 
     }
 
     try {
@@ -41,9 +41,15 @@ function login() {
         handleSuccess(message);
         localStorage.setItem("token", jwtToken);
         localStorage.setItem("loggedInUser", name);
+        localStorage.setItem("role", data.role);
+        
         setloginInfo({ email: "", password: "" });
         setTimeout(() => {
-          navigate("/home");
+          if (data.role === "freelancer") {
+            navigate("/freelancer/home");
+          } else {
+            navigate("/client/home");
+          }
         }, 1000);
       } else {
         handleError(message);
