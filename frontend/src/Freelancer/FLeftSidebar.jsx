@@ -9,13 +9,13 @@ function fLeftSidebar() {
         <ul>
           <li>
             <Link
-              to="/client/messages"
+              to="/freelancer/messages"
               className="block py-2 px-3 rounded hover:bg-gray-700"
             >
               New Project
             </Link>
             <Link
-              to="/client/home"
+              to="/freelancer/home"
               className="block py-2 px-3 rounded hover:bg-gray-700"
             >
               Dashboard
@@ -23,7 +23,7 @@ function fLeftSidebar() {
           </li>
           <li>
             <Link
-              to="/client/projects"
+              to="/freelancer/projects"
               className="block py-2 px-3 rounded hover:bg-gray-700"
             >
               Projects
@@ -34,7 +34,7 @@ function fLeftSidebar() {
           <hr className="border-t border-[#d7d7d7] m-4" />
           <li>
             <Link
-              to="/client/settings"
+              to="/freelancer/settings"
               className="block py-2 px-3 rounded hover:bg-gray-700"
             >
               Settings

@@ -10,6 +10,7 @@ import ClientProject from "./Client/ClientProject";
 import FreelancerLayout from "./Freelancer/FreelancerLayout";
 import FreelancerDashboard from "./Freelancer/FreelancerDashboard";
 import ProtectedRoute from "./ProtectedRoute";
+import FreelancerProject from "./Freelancer/FreelancerProject"
 
 export default function App() {
   return (
@@ -42,6 +43,7 @@ export default function App() {
           }
         >
           <Route path="home" element={<FreelancerDashboard />} />
+          <Route path="projects" element={<FreelancerProject />} />
         </Route>
       </Routes>
     </Router>
