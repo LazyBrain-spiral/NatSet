@@ -14,6 +14,10 @@ router.get("/available", getAvailableTasks);
 
 router.get("/:id", getTaskById);
 
+router.patch("/:id/assign", assignProject);
+
 router.patch("/:id", updateTaskStatus);
+
+
 
 module.exports = router;

@@ -97,6 +97,7 @@ const login = async (req, res) => {
       email,
       name: user.name,
       role: user.role,
+      _id: user._id,
     });
   } catch (error) {
     console.log(error);

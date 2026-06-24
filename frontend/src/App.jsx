@@ -11,6 +11,7 @@ import FreelancerLayout from "./Freelancer/FreelancerLayout";
 import FreelancerDashboard from "./Freelancer/FreelancerDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import FreelancerProject from "./Freelancer/FreelancerProject"
+import FreelancerView from "./Freelancer/FreelancerView"
 
 export default function App() {
   return (
@@ -44,6 +45,8 @@ export default function App() {
         >
           <Route path="home" element={<FreelancerDashboard />} />
           <Route path="projects" element={<FreelancerProject />} />
+          <Route path="projects/:id" element={<FreelancerView />} />
+          <Route path="execution/:id" element={<FreelancerExecution />} />
         </Route>
       </Routes>
     </Router>

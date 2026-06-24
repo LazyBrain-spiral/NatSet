@@ -42,6 +42,7 @@ function login() {
         localStorage.setItem("token", jwtToken);
         localStorage.setItem("loggedInUser", name);
         localStorage.setItem("role", data.role);
+        localStorage.setItem("userId", data._id);
         
         setloginInfo({ email: "", password: "" });
         setTimeout(() => {

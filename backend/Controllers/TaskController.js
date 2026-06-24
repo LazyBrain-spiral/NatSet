@@ -47,5 +47,20 @@ const getAvailableTasks = async (req, res) => {
     });
   }
 };
+const assignProject = async (req, res) => {
+  const { id } = req.params;
+  const { freelancerId } = req.body;
+  try {
+    const project = await Task.findByIdAndUpdate(
+      id,
+      { assigned: true, freelancerId },
+      { new: true },
+    );
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 
-module.exports = { getAllTasks, getTaskById, updateTaskStatus, getAvailableTasks };
+module.exports = { getAllTasks, getTaskById, updateTaskStatus, assignProject , getAvailableTasks};
+

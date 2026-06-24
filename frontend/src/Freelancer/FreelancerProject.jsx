@@ -1,9 +1,13 @@
 import React, { useEffect } from "react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 function FreelancerProject() {
   const [projects, setProjects] = useState([]);
   const [loggedInUser] = useState(localStorage.getItem("loggedInUser"));
+  const Navigate = useNavigate();
   async function fetchProjects() {
     try {
       const response = await fetch("http://localhost:3001/projects/available");
@@ -23,12 +27,9 @@ function FreelancerProject() {
 
   return (
     <div className="min-h-screen bg-[#070B1A] text-white p-8">
-      {/* Header */}
       <div className="flex justify-between items-center mb-10">
         <div>
-          <h1 className="text-5xl font-bold">
-            Current Projects
-          </h1>
+          <h1 className="text-5xl font-bold">Current Projects</h1>
 
           <p className="text-zinc-400 mt-2">
             Browse available projects and start earning.
@@ -41,7 +42,6 @@ function FreelancerProject() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
         <div className="rounded-3xl border border-purple-500/10 bg-[#0B1020]/70 backdrop-blur-md p-6">
           <p className="text-zinc-400">Available Projects</p>
@@ -56,7 +56,6 @@ function FreelancerProject() {
         </div>
       </div>
 
-      {/* Empty State */}
       {projects.length === 0 ? (
         <div className="rounded-3xl border border-purple-500/10 bg-[#0B1020]/70 backdrop-blur-md p-20 text-center">
           <div className="w-24 h-24 mx-auto rounded-full bg-purple-600/10 flex items-center justify-center mb-8">
@@ -154,20 +153,11 @@ function FreelancerProject() {
                 )}
 
                 <button
+                  onClick={() =>
+                    Navigate(`/freelancer/projects/${project._id}`)
+                  }
                   className="
-    w-full
-    mt-5
-    py-3
-    rounded-xl
-    bg-gradient-to-r
-    from-purple-600
-    to-violet-600
-    hover:from-purple-500
-    hover:to-violet-500
-    transition-all
-    font-medium
-  "
-                >
+    w-full mt-5 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 transition-all font-medium">
                   View Project
                 </button>
               </div>
