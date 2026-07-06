@@ -12,6 +12,7 @@ import FreelancerDashboard from "./Freelancer/FreelancerDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import FreelancerProject from "./Freelancer/FreelancerProject"
 import FreelancerView from "./Freelancer/FreelancerView"
+import FreelancerExecution from "./Freelancer/FreelancerExecution";
 
 export default function App() {
   return (

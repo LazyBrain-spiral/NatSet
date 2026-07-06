@@ -26,7 +26,7 @@ function FreelancerView() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ freelancerId }),
     });
-    navigate(`/freelancer/execution/${id}`);
+    history.back();
   };
 
   if (!project) {
@@ -36,14 +36,13 @@ function FreelancerView() {
   return (
     <div className="flex-1 p-10 text-white h-screen overflow-y-auto">
       <h1 className="text-4xl font-bold mb-2">{project.title}</h1>
+      <p className="text-gray-400 mb-10">{project.prompt}</p>
       <button
         className="bg-purple-600 hover:bg-purple-700 px-6 py-3 rounded-xl font-semibold transition"
         onClick={handleTakeProject}
       >
         Take Project
       </button>
-
-      <p className="text-gray-400 mb-10">{project.prompt}</p>
 
       <div className="space-y-5">
         {project.tasks.map((task) => (

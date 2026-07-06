@@ -6,16 +6,13 @@ const {
   getTaskById,
   updateTaskStatus,
   getAvailableTasks,
+  assignProject,
 } = require("../Controllers/TaskController.js");
 
-router.get("/", getAllTasks);
-
 router.get("/available", getAvailableTasks);
-
+router.get("/", getAllTasks);
 router.get("/:id", getTaskById);
-
 router.patch("/:id/assign", assignProject);
-
 router.patch("/:id", updateTaskStatus);
 
 
