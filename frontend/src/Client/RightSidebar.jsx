@@ -7,7 +7,14 @@ function RightSidebar() {
   useEffect(() => {
     async function fetchProjects() {
       try {
-        const response = await fetch("http://localhost:3001/projects");
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("http://localhost:3001/projects", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         const data = await response.json();
         setProjects(data);
       } catch (error) {
@@ -33,6 +40,13 @@ function RightSidebar() {
                   to={`/client/projects/${project._id}`}
                   className="block py-3 px-4 rounded-xl hover:bg-white/5 transition-colors border border-transparent hover:border-white/10"
                 >
+                  <span className="mr-2">
+                    {project.projectStatus === "completed"
+                      ? "✅"
+                      : project.projectStatus === "in_progress"
+                        ? "🔧"
+                        : "📋"}
+                  </span>
                   {project.title}
                 </Link>
               </li>

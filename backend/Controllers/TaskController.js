@@ -2,7 +2,9 @@ const Task = require("../Models/Tasks.js");
 
 const getAllTasks = async (req, res) => {
   try {
-    const data = await Task.find();
+    const data = await Task.find({
+      clientId: req.user._id,
+    });
     res.json(data);
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch tasks" });
@@ -37,7 +39,7 @@ const updateTaskStatus = async (req, res) => {
 const getAvailableTasks = async (req, res) => {
   try {
     const tasks = await Task.find({
-      assigned: false,
+      projectStatus: "open",
     });
 
     res.json(tasks);
@@ -53,7 +55,7 @@ const assignProject = async (req, res) => {
   try {
     const project = await Task.findByIdAndUpdate(
       id,
-      { assigned: true, freelancerId },
+      { projectStatus: "in_progress", freelancerId },
       { new: true },
     );
     res.json(project);
@@ -62,5 +64,18 @@ const assignProject = async (req, res) => {
   }
 };
 
-module.exports = { getAllTasks, getTaskById, updateTaskStatus, assignProject , getAvailableTasks};
+const completeProject = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const project = await Task.findByIdAndUpdate(
+      id,
+      { projectStatus: "completed" },
+      { new: true },
+    );
+    res.json(project);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+module.exports = { getAllTasks, getTaskById, updateTaskStatus, assignProject , getAvailableTasks , completeProject};
 

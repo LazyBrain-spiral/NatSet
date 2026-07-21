@@ -64,10 +64,15 @@ export default function OllamaChat() {
   const handleConfirm = async () => {
     if (!pendingTasks) return;
 
+    const token = localStorage.getItem("token");
+
     try {
       const res = await fetch("http://localhost:3001/save", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ data: pendingTasks }),
       });
 
@@ -192,7 +197,7 @@ export default function OllamaChat() {
                         onClick={handleConfirm}
                         className="px-4 py-2 bg-green-600 hover:bg-green-500 text-white text-sm rounded-lg font-medium"
                       >
-                        Save to JSON
+                        Save
                       </button>
                       <button
                         onClick={handleDiscard}

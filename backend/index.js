@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 const AuthRouter = require("./Routes/AuthRouter.js");
 const TaskRouter = require("./Routes/TaskRouter.js");
-const FreelancerRouter = require("./Routes/FreelancerRouter.js");
+const ensureAuthenticated = require("./Middlewares/ensureAuthenticated");
 
 require("dotenv").config();
 require("./Models/db.js");
@@ -108,7 +108,7 @@ app.post("/chat", async (req, res) => {
         createdAt: new Date().toISOString(),
         aiResponse,
         tasks,
-        assigned:false,
+        projectStatus: "open",
       },
     });
   } catch (err) {
@@ -155,11 +155,13 @@ app.post("/chat", async (req, res) => {
   }
 });
 
-app.post("/save", async (req, res) => {
+app.post("/save", ensureAuthenticated , async (req, res) => {
   const Task = require("./Models/Tasks.js");
   const { data } = req.body;
   try {
-    const savedTask = await Task.create(data);
+    const savedTask = await Task.create({
+      ...data,
+      clientId : req.user._id});
     console.log("💾 Saved to MongoDB:", savedTask._id);
     res.json({ success: true, id: savedTask._id });
   } catch (err) {
@@ -267,7 +269,7 @@ function extractField(block, fieldName) {
   const match = block.match(pattern);
   return match ? match[1].replace(/\n/g, " ").trim() : "";
 }
-app.use("/freelancers", FreelancerRouter);
+
 
 app.listen(PORT, () => {
   console.log(`Backend running at http://localhost:${PORT}`);

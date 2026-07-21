@@ -15,13 +15,11 @@ function ClientProject() {
         setProject(data);
         if (data.freelancerId) {
           const fRes = await fetch(
-            `http://localhost:3001/freelancers/${data.freelancerId}`,
+            `http://localhost:3001/auth/users/${data.freelancerId}`,
           );
           const fData = await fRes.json();
           setFreelancer(fData);
         }
-
-        
         const initialTasks = data.tasks.map((task) => ({
           ...task,
           price: task.price || 0,
@@ -40,15 +38,9 @@ function ClientProject() {
       prev.map((t) => {
         if (t.id !== taskId) return t;
         let newStatus;
-        if (t.status === "not_started") {
-          newStatus = "in_progress";
-        }
-        if (t.status === "in_progress") {
-          newStatus = "completed";
-        }
-        if (t.status === "completed") {
-          newStatus = "not_started";
-        }
+        if (t.status === "not_started") newStatus = "in_progress";
+        if (t.status === "in_progress") newStatus = "completed";
+        if (t.status === "completed") newStatus = "not_started";
 
         fetch(`http://localhost:3001/projects/${id}`, {
           method: "PATCH",
@@ -64,7 +56,6 @@ function ClientProject() {
   if (!project) {
     return <div className="text-white p-10">Loading project...</div>;
   }
-
 
   const completedTasks = tasks.filter((t) => t.status === "completed").length;
   const totalTasks = tasks.length;
@@ -119,7 +110,7 @@ function ClientProject() {
       <h1 className="text-4xl font-bold mb-2">{project.title}</h1>
       <p className="text-gray-400 mb-8">{project.prompt}</p>
 
-      <div className="bg-[#111827] border border-white/10 rounded-xl p-5 mb-8 grid grid-cols-4 gap-6">
+      <div className="bg-[#111827] border border-white/10 rounded-xl p-5 mb-8 grid grid-cols-5 gap-6">
         <div>
           <p className="text-gray-400 text-sm mb-1">Progress</p>
           <p className="text-purple-400 text-2xl font-bold mb-2">
@@ -136,6 +127,7 @@ function ClientProject() {
           </p>
         </div>
 
+        {/* Freelancer */}
         <div className="border-l border-white/10 pl-6">
           <p className="text-gray-400 text-sm mb-2">Assigned Freelancer</p>
           <div className="flex items-center gap-3">
@@ -147,10 +139,12 @@ function ClientProject() {
                   alt={freelancerData.name}
                 />
               ) : (
-                freelancerData.name
+                (freelancerData.name || "U")
                   .split(" ")
                   .map((n) => n[0])
                   .join("")
+                  .toUpperCase()
+                  .slice(0, 2)
               )}
             </div>
             <div>
@@ -166,6 +160,7 @@ function ClientProject() {
           </div>
         </div>
 
+        {/* Earnings */}
         <div className="border-l border-white/10 pl-6">
           <p className="text-gray-400 text-sm mb-1">Earned / Total Value</p>
           <p className="text-2xl font-bold mb-2">
@@ -186,6 +181,7 @@ function ClientProject() {
           </p>
         </div>
 
+        
         <div className="border-l border-white/10 pl-6 flex items-center gap-3">
           <div className="text-purple-400 text-2xl">📅</div>
           <div>
@@ -195,8 +191,31 @@ function ClientProject() {
             <p className="text-sm font-semibold">{dueDate}</p>
           </div>
         </div>
+
+        
+        <div className="border-l border-white/10 pl-6 flex items-center">
+          <div>
+            <p className="text-gray-400 text-xs mb-2">Project Status</p>
+            <span
+              className={`text-sm font-semibold px-3 py-1 rounded-full ${
+                project.projectStatus === "completed"
+                  ? "bg-green-500/20 text-green-400"
+                  : project.projectStatus === "in_progress"
+                    ? "bg-purple-500/20 text-purple-400"
+                    : "bg-white/5 text-gray-400"
+              }`}
+            >
+              {project.projectStatus === "completed"
+                ? "✅ Completed"
+                : project.projectStatus === "in_progress"
+                  ? "🔧 In Progress"
+                  : "📋 Open"}
+            </span>
+          </div>
+        </div>
       </div>
 
+      {/* Task Cards */}
       <div className="space-y-4">
         {tasks.map((task) => {
           const statusStyle = getStatusStyle(task.status);

@@ -23,9 +23,11 @@ const taskSchema = new mongoose.Schema({
     },
   ],
   freelancerId: String,
-  assigned: {
-    type: Boolean,
-    default: false,
+  clientId: String,
+  projectStatus: {
+    type: String,
+    enum: ["open", "assigned","completed"],
+    default: "open",
   },
 });
 

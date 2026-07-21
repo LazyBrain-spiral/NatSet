@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams , useNavigate } from "react-router-dom";
 
 function FreelancerView() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [project, setProject] = useState(null);
 
@@ -26,7 +27,7 @@ function FreelancerView() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ freelancerId }),
     });
-    history.back();
+    navigate(`/freelancer/execution/${id}`);
   };
 
   if (!project) {

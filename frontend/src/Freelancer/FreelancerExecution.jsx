@@ -35,9 +35,25 @@ const handleTaskAction = async (taskId, currentStatus) => {
     body: JSON.stringify({ taskId, status: newStatus }),
   });
 
-  setTasks((prev) =>
-    prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t)),
+  const updatedTasks = tasks.map((t) =>
+    t.id === taskId ? { ...t, status: newStatus } : t,
   );
+
+  setTasks(updatedTasks);
+
+  const allDone = updatedTasks.every((t) => t.status === "completed");
+
+  if (allDone) {
+    await fetch(`http://localhost:3001/projects/${id}/complete`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    setProject((prev) => ({
+      ...prev,
+      projectStatus: "completed",
+    }));
+  }
 };
 
   if (!project) {
@@ -147,7 +163,7 @@ const handleTaskAction = async (taskId, currentStatus) => {
                   : "border-white/10"
               }`}
             >
-              {/* Status indicator */}
+              
               <div
                 className={`mt-1 w-6 h-6 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${
                   isCompleted
@@ -172,7 +188,7 @@ const handleTaskAction = async (taskId, currentStatus) => {
                 )}
               </div>
 
-              {/* Task Content */}
+              
               <div className="flex-1 min-w-0">
                 <h2
                   className={`text-lg font-semibold ${isCompleted ? "line-through text-gray-500" : "text-white"}`}
@@ -197,7 +213,7 @@ const handleTaskAction = async (taskId, currentStatus) => {
                 </p>
               </div>
 
-              {/* Price + Status + Submit */}
+              
               <div className="flex flex-col items-end gap-2 flex-shrink-0">
                 <p className="text-base font-semibold">
                   <span className="text-green-400">
